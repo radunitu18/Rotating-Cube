@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<style>
+		body {
+		margin: 0;
+		overflow: hidden;
+		}
+	</style>
+</head>
+<body>
+	<script type="module">
+		import * as THREE from "https://web.cs.manchester.ac.uk/three/three.js-master/build/three.module.js";
+
+		//Your Javascript will go here.
+        var camera, scene, renderer, mesh;
+
+        function initialisation(){
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth
+            / window.innerHeight, 0.1, 1000 );
+            /* 1. The purpose of the arguments is as follows:
+            1st argument (fov) represents the camera's vertical field of view. The lower the number, the closer the camera will be to the subject.
+            2nd argument (aspect) represents the camera's aspect ratio. If the values are changed from width/height, the object gets distorted. It will either be made narrower, if the value increases, or longer if the value decreases.
+            3rd argument (near) represents the near plane. If the near plane value is too big, the subject won't show or the front side of it will be cut off
+            4th argument (far) represents the far plane. If the far plane value is too little, the subject won't show, or the back side of it will be cut off
+             2. When you increase or decrese numerical values you alter the camera's perspective of the object, in ways outlined in question 1.
+            */
+            camera.position.z = 5;
+            /* 3. The value of camera.position.z will determine how close or how far from the subject the camera is. If it is 0, the camera will be "inside" the subject, but if it is bigger than the camera will be further away.
+             4. When decreasing the value, the camera gets closer to the subject. If it is 0, then the camera is in the subject. If the value increases, the camera goes further away from the subject, and the subject looks smaller
+            */
+            renderer = new THREE.WebGLRenderer();
+            renderer.setClearColor(0x000000, 1.0);
+            renderer.setSize( window.innerWidth, window.innerHeight );
+            /* 5. When increasing the first argument the whole perspective gets wider, and when it decreases it gets narrower. When increasing the second argument, the perspective gets taller, and when decreasing it gets shorter.
+            */
+            document.body.appendChild( renderer.domElement );
+            shaderCube();
+            
+        }
+        
+        function shaderCube(){
+            var geometry = new THREE.BoxGeometry(2, 1, 1);
+            /* 6. Changing the arguments changes the length, width and depth of the cube.
+            */
+            var material = new THREE.ShaderMaterial({
+            fragmentShader: fragmentShader(),
+            vertexShader: vertexShader()
+            });
+            mesh = new THREE.Mesh(geometry, material);
+            scene.add(mesh);
+        }
+
+        function animate(){
+            renderer.render(scene, camera);
+            requestAnimationFrame(animate);
+            mesh.rotation.x += 0.011;
+            mesh.rotation.y += 0.013;
+            /* 7. To speed up the motion of the cuboid increase the values of mesh.rotation.x and mesh.rotation.y.S
+            */
+        }
+
+        function vertexShader(){
+            return `
+                    vec4 p;
+                    varying vec3 vposInterpolated;
+                    void main() {
+                    p = projectionMatrix * modelViewMatrix * vec4(position,
+                    1.0);
+                    gl_Position = p;
+                    vposInterpolated = p.xyz;
+                    }
+                    `
+        }
+
+        function fragmentShader(){
+            return `
+                varying vec3 vposInterpolated;
+                void main() {
+                gl_FragColor = vec4(vposInterpolated, 1.0);
+                }
+                `
+        }
+        /* 8. To change the colour of the cube, change the value of gl_FragColor.
+        */
+
+        initialisation();
+        animate()
+	</script>
+
+</body>
+</html>
